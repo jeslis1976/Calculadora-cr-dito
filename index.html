@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora de Capacidad de Pago</title>
+<style>
+  :root{
+    --azul:#0b3b66;
+    --azul2:#145a91;
+    --celeste:#eaf4fb;
+    --verde:#198754;
+    --verde-bg:#e9f7ef;
+    --rojo:#c62828;
+    --rojo-bg:#fdecec;
+    --gris:#667085;
+    --borde:#d9e2ec;
+    --fondo:#f5f8fb;
+    --blanco:#fff;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Inter,Arial,Helvetica,sans-serif;
+    background:linear-gradient(135deg,#eef5fa,#f8fafc);
+    color:#172b4d;
+  }
+  .contenedor{max-width:900px;margin:0 auto;padding:28px 18px 40px}
+  .encabezado{
+    background:linear-gradient(135deg,var(--azul),var(--azul2));
+    color:white;border-radius:20px;padding:28px;
+    box-shadow:0 12px 30px rgba(11,59,102,.18);
+  }
+  .etiqueta{
+    display:inline-block;background:rgba(255,255,255,.14);
+    padding:6px 11px;border-radius:999px;font-size:12px;
+    font-weight:700;letter-spacing:.4px;text-transform:uppercase
+  }
+  h1{margin:12px 0 8px;font-size:30px}
+  .subtitulo{margin:0;opacity:.9;line-height:1.5}
+  .tarjeta{
+    background:var(--blanco);border:1px solid var(--borde);
+    border-radius:18px;padding:24px;margin-top:20px;
+    box-shadow:0 8px 24px rgba(16,42,67,.07)
+  }
+  .titulo-seccion{margin:0 0 18px;font-size:20px;color:var(--azul)}
+  .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+  .campo{display:flex;flex-direction:column}
+  label{font-weight:750;margin-bottom:7px}
+  .ayuda{font-size:12.5px;color:var(--gris);line-height:1.45;margin:0 0 8px}
+  .entrada{
+    display:flex;align-items:center;border:1px solid var(--borde);
+    border-radius:12px;background:white;overflow:hidden;
+    transition:.2s
+  }
+  .entrada:focus-within{border-color:#4c8fc4;box-shadow:0 0 0 3px rgba(20,90,145,.10)}
+  .prefijo{padding-left:13px;color:#536471;font-weight:700}
+  input{
+    width:100%;border:0;outline:0;padding:13px 12px;
+    font-size:16px;background:transparent;color:#172b4d
+  }
+  .botones{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+  button{
+    border:0;border-radius:12px;padding:13px 18px;font-size:15px;
+    font-weight:800;cursor:pointer
+  }
+  .principal{background:var(--azul);color:#fff;flex:1}
+  .secundario{background:#edf2f7;color:var(--azul)}
+  button:hover{filter:brightness(.97)}
+  .resultado{display:none}
+  .resultado.visible{display:block}
+  .estado{
+    border-radius:16px;padding:20px;margin-bottom:18px;
+    display:flex;align-items:center;gap:15px
+  }
+  .estado.aprobado{background:var(--verde-bg);border:1px solid #b8e1c8;color:#145c38}
+  .estado.rechazado{background:var(--rojo-bg);border:1px solid #f0b8b8;color:#8d1d1d}
+  .icono{font-size:34px;line-height:1}
+  .estado h3{margin:0 0 4px;font-size:22px}
+  .estado p{margin:0;line-height:1.45}
+  .metricas{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+  .metrica{background:#f8fafc;border:1px solid var(--borde);border-radius:14px;padding:16px}
+  .metrica small{display:block;color:var(--gris);font-weight:700;margin-bottom:6px}
+  .metrica strong{font-size:22px;color:var(--azul)}
+  .barra-wrap{margin-top:18px}
+  .barra-cabecera{display:flex;justify-content:space-between;font-size:13px;font-weight:750;margin-bottom:7px}
+  .barra{height:13px;background:#e8edf2;border-radius:999px;overflow:hidden}
+  .relleno{height:100%;width:0;border-radius:999px;transition:width .5s}
+  .relleno.aprobado{background:var(--verde)}
+  .relleno.rechazado{background:var(--rojo)}
+  .nota{
+    margin-top:18px;padding:14px;border-left:4px solid var(--azul2);
+    background:var(--celeste);border-radius:8px;color:#284b63;
+    line-height:1.5;font-size:13px
+  }
+  .formula{
+    margin-top:16px;background:#fafafa;border:1px dashed #cbd5e1;
+    padding:14px;border-radius:10px;font-size:13px;color:#475467
+  }
+  footer{text-align:center;color:#7b8794;font-size:12px;margin-top:18px}
+  @media(max-width:650px){
+    .grid,.metricas{grid-template-columns:1fr}
+    h1{font-size:25px}
+    .encabezado,.tarjeta{padding:20px}
+  }
+</style>
+</head>
+<body>
+<div class="contenedor">
+  <header class="encabezado">
+    <span class="etiqueta">Análisis de riesgo crediticio</span>
+    <h1>Calculadora de Capacidad de Pago</h1>
+    <p class="subtitulo">Evalúa de forma rápida si el nivel de endeudamiento del solicitante se encuentra dentro del límite del 30%.</p>
+  </header>
+
+  <section class="tarjeta">
+    <h2 class="titulo-seccion">Datos del solicitante</h2>
+    <div class="grid">
+      <div class="campo">
+        <label for="ingreso">Ingreso Mensual Neto</label>
+        <p class="ayuda">Ingrese el ingreso mensual que recibe el solicitante después de las deducciones aplicables.</p>
+        <div class="entrada"><span class="prefijo">$</span><input id="ingreso" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      </div>
+
+      <div class="campo">
+        <label for="obligaciones">Obligaciones Actuales</label>
+        <p class="ayuda">Suma de las cuotas mensuales de préstamos, tarjetas y demás compromisos financieros vigentes.</p>
+        <div class="entrada"><span class="prefijo">$</span><input id="obligaciones" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      </div>
+
+      <div class="campo">
+        <label for="cuota">Cuota del Nuevo Préstamo</label>
+        <p class="ayuda">Ingrese la cuota mensual estimada del nuevo préstamo que se desea evaluar.</p>
+        <div class="entrada"><span class="prefijo">$</span><input id="cuota" type="number" min="0" step="0.01" placeholder="0.00"></div>
+      </div>
+
+      <div class="campo">
+        <label for="limite">Límite de endeudamiento</label>
+        <p class="ayuda">Por defecto se utiliza el límite indicado en el ejercicio.</p>
+        <div class="entrada"><input id="limite" type="number" min="0" max="100" step="0.1" value="30"><span class="prefijo" style="padding:0 13px 0 0">%</span></div>
+      </div>
+    </div>
+
+    <div class="botones">
+      <button class="principal" onclick="calcular()">Calcular capacidad de pago</button>
+      <button class="secundario" onclick="limpiar()">Limpiar</button>
+    </div>
+  </section>
+
+  <section id="resultado" class="tarjeta resultado" aria-live="polite">
+    <h2 class="titulo-seccion">Resultado de la evaluación</h2>
+    <div id="estado" class="estado">
+      <div id="icono" class="icono"></div>
+      <div>
+        <h3 id="tituloEstado"></h3>
+        <p id="mensajeEstado"></p>
+      </div>
+    </div>
+
+    <div class="metricas">
+      <div class="metrica">
+        <small>Endeudamiento total</small>
+        <strong id="endeudamiento">0%</strong>
+      </div>
+      <div class="metrica">
+        <small>Límite permitido</small>
+        <strong id="limiteMostrar">30%</strong>
+      </div>
+      <div class="metrica">
+        <small>Cuota máxima según límite</small>
+        <strong id="cuotaMaxima">$0.00</strong>
+      </div>
+    </div>
+
+    <div class="barra-wrap">
+      <div class="barra-cabecera">
+        <span>Nivel de endeudamiento</span>
+        <span id="barraTexto">0%</span>
+      </div>
+      <div class="barra"><div id="relleno" class="relleno"></div></div>
+    </div>
+
+    <div class="nota" id="detalle"></div>
+
+    <div class="formula">
+      <strong>Fórmula utilizada:</strong>
+      Endeudamiento = (Obligaciones actuales + Cuota del nuevo préstamo) ÷ Ingreso mensual neto × 100.
+    </div>
+  </section>
+
+  <footer>Herramienta educativa de apoyo. La aprobación real de un crédito depende de las políticas, documentación y criterios de riesgo de la entidad financiera.</footer>
+</div>
+
+<script>
+function dinero(valor){
+  return new Intl.NumberFormat('es-PA',{style:'currency',currency:'USD',minimumFractionDigits:2}).format(valor);
+}
+
+function numero(id){
+  const v = parseFloat(document.getElementById(id).value);
+  return Number.isFinite(v) ? v : 0;
+}
+
+function calcular(){
+  const ingreso = numero('ingreso');
+  const obligaciones = numero('obligaciones');
+  const cuota = numero('cuota');
+  const limite = numero('limite');
+
+  const resultado = document.getElementById('resultado');
+  resultado.classList.add('visible');
+
+  if(ingreso <= 0){
+    document.getElementById('estado').className='estado rechazado';
+    document.getElementById('icono').textContent='⚠️';
+    document.getElementById('tituloEstado').textContent='Datos incompletos';
+    document.getElementById('mensajeEstado').textContent='Ingrese un ingreso mensual neto mayor que cero para realizar el cálculo.';
+    document.getElementById('endeudamiento').textContent='—';
+    document.getElementById('limiteMostrar').textContent=limite.toFixed(1)+'%';
+    document.getElementById('cuotaMaxima').textContent='—';
+    document.getElementById('relleno').style.width='0%';
+    document.getElementById('barraTexto').textContent='—';
+    document.getElementById('detalle').textContent='El ingreso mensual neto es necesario para determinar la capacidad de pago.';
+    return;
+  }
+
+  const total = obligaciones + cuota;
+  const porcentaje = (total / ingreso) * 100;
+  const cuotaMaximaTotal = ingreso * (limite / 100);
+  const disponibleParaNuevaCuota = Math.max(0, cuotaMaximaTotal - obligaciones);
+  const aprobado = porcentaje <= limite;
+
+  const estado = document.getElementById('estado');
+  const relleno = document.getElementById('relleno');
+  estado.className = 'estado ' + (aprobado ? 'aprobado' : 'rechazado');
+  relleno.className = 'relleno ' + (aprobado ? 'aprobado' : 'rechazado');
+
+  document.getElementById('icono').textContent = aprobado ? '✓' : '✕';
+  document.getElementById('tituloEstado').textContent = aprobado ? 'APROBADO' : 'RECHAZADO';
+  document.getElementById('mensajeEstado').textContent = aprobado
+    ? 'El endeudamiento calculado se encuentra dentro del límite permitido.'
+    : 'El endeudamiento calculado supera el límite permitido.';
+
+  document.getElementById('endeudamiento').textContent = porcentaje.toFixed(2) + '%';
+  document.getElementById('limiteMostrar').textContent = limite.toFixed(1) + '%';
+  document.getElementById('cuotaMaxima').textContent = dinero(cuotaMaximaTotal);
+
+  const ancho = Math.min((porcentaje / Math.max(limite, 1)) * 100, 100);
+  relleno.style.width = ancho + '%';
+  document.getElementById('barraTexto').textContent = porcentaje.toFixed(2) + '%';
+
+  if(aprobado){
+    const margen = limite - porcentaje;
+    document.getElementById('detalle').innerHTML =
+      'Con las obligaciones actuales y la nueva cuota, el solicitante queda con un margen de <strong>' +
+      margen.toFixed(2) + ' puntos porcentuales</strong> frente al límite. ' +
+      'La cuota adicional máxima estimada para mantenerse dentro del límite sería de <strong>' +
+      dinero(disponibleParaNuevaCuota) + '</strong> al mes.';
+  }else{
+    const exceso = porcentaje - limite;
+    document.getElementById('detalle').innerHTML =
+      'El nivel de endeudamiento excede el límite en <strong>' +
+      exceso.toFixed(2) + ' puntos porcentuales</strong>. ' +
+      'Para cumplir el límite, la cuota del nuevo préstamo tendría que reducirse aproximadamente a <strong>' +
+      dinero(disponibleParaNuevaCuota) + '</strong> o menos, suponiendo que las obligaciones actuales permanezcan sin cambios.';
+  }
+}
+
+function limpiar(){
+  document.getElementById('ingreso').value='';
+  document.getElementById('obligaciones').value='';
+  document.getElementById('cuota').value='';
+  document.getElementById('limite').value='30';
+  document.getElementById('resultado').classList.remove('visible');
+}
+</script>
+</body>
+</html>
